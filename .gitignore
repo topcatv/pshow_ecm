@@ -1,2 +1,6 @@
 /.settings
-/.project
+*.project
+/repo/logs
+/repo/.settings
+/repo/target
+*.classpath

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://pshow.org/content/definition/1.0" name="sys:systemmodel">
+	<description>Alfresco Repository System Definitions</description>
+	<author>Alfresco</author>
+	<published>2005-09-29</published>
+	<version>1.0</version>
+	<imports>
+		<namespace uri="http://www.pshow.org/model/datatype/0.1" prefix="d" />
+	</imports>
+	<namespaces>
+		<namespace uri="http://www.pshow.org/model/system/0.1" prefix="sys" />
+	</namespaces>
+	<data-types />
+	<constraints />
+	<types>
+		<type name="sys:base">
+			<title>Base</title>
+			<properties>
+				<property name="sys:name" mandatory="true" indexed="true">
+					<title>名称</title>
+					<type>d:text</type>
+				</property>
+				<property name="sys:description" mandatory="false" indexed="true">
+					<title>描述</title>
+					<type>d:text</type>
+				</property>
+			</properties>
+		</type>
+		<type name="sys:folder">
+			<title>文件夹</title>
+			<parent>sys:base</parent>
+			<properties />
+		</type>
+		<type name="sys:file">
+			<title>文件</title>
+			<parent>sys:base</parent>
+			<properties>
+				<property name="sys:encoding" mandatory="false">
+					<title>字符集编码</title>
+					<type>d:text</type>
+				</property>
+				<property name="sys:mimeType" mandatory="true">
+					<title>文件类型</title>
+					<type>d:text</type>
+				</property>
+				<property name="sys:data" indexed="true" mandatory="true">
+					<title>文件</title>
+					<type>d:content</type>
+				</property>
+			</properties>
+		</type>
+		<type name="sys:container">
+			<title>Container</title>
+			<parent>sys:base</parent>
+			<properties />
+		</type>
+	</types>
+	<facets>
+		<facet name="sys:deletable">
+			<title>可删除</title>
+			<properties>
+				<property name="sys:deleted" indexed="true">
+					<title>已删除</title>
+					<type>d:boolean</type>
+				</property>
+			</properties>
+		</facet>
+		<facet name="sys:versionable">
+			<title>版本</title>
+			<properties>
+				<property name="sys:versionlabel" mandatory="true" indexed="true">
+					<title>版本标签</title>
+					<type>d:text</type>
+				</property>
+				<property name="sys:versiondescription" indexed="true">
+					<title>版本描述</title>
+					<type>d:text</type>
+				</property>
+			</properties>
+		</facet>
+	</facets>
+</model>
