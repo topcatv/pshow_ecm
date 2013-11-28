@@ -25,5 +25,29 @@ import java.io.Serializable;
 public class Workspace implements Serializable {
 
 	private static final long serialVersionUID = 8809452862026930901L;
+	
+	private String name;
+	
+	private String root;
+	
+	private Long id;
+
+	public Workspace(org.pshow.ecm.persistence.entity.Workspace workspace) {
+		this.name = workspace.getName();
+		this.id = workspace.getId();
+		this.root = workspace.getRoot().getUuid();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getRoot() {
+		return root;
+	}
+
+	public Long getId() {
+		return id;
+	}
 
 }

@@ -16,7 +16,10 @@
  */
 package org.pshow.ecm.persistence.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -30,10 +33,10 @@ import org.hibernate.validator.constraints.NotBlank;
 public class Workspace extends IdEntity {
 
 	private String name;
-	private String root;
-	
-	public Workspace(){
-		
+	private Content root;
+
+	public Workspace() {
+
 	}
 
 	public Workspace(String name) {
@@ -41,6 +44,7 @@ public class Workspace extends IdEntity {
 	}
 
 	@NotBlank
+	@Column(unique = true)
 	public String getName() {
 		return name;
 	}
@@ -49,11 +53,13 @@ public class Workspace extends IdEntity {
 		this.name = name;
 	}
 
-	public String getRoot() {
+	@OneToOne
+	@JoinColumn(name = "content_id")
+	public Content getRoot() {
 		return root;
 	}
 
-	public void setRoot(String root) {
+	public void setRoot(Content root) {
 		this.root = root;
 	}
 

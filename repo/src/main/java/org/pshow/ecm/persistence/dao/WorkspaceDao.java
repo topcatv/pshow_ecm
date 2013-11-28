@@ -29,7 +29,7 @@ public interface WorkspaceDao extends JpaRepository<Workspace, Long>{
 
 	public Workspace findByName(String workspace);
 
-	@Query("select count(*) from WorkspaceModel as ws where ws.name = :name")
+	@Query("select count(*) from Workspace as ws where ws.name = :name")
 	public int countByName(@Param("name") String workspace);
 
 }
