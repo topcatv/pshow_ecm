@@ -1,0 +1,6 @@
+test_getproperties: 
+    content_type: test\:TestType
+    test\:username: 中文试试
+    test\:age: 32
+    test\:birthday: 1982-02-01
+    test\:sex: 男

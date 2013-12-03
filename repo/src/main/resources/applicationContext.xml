@@ -76,8 +76,9 @@
 		<property name="csh" ref="contentSchemaHolder" />
 		<property name="xml_resources">
 			<list>
-				<value>classpath:datatype.xml</value>
-				<value>classpath:system.xml</value>
+				<value>classpath:definition/datatype.xml</value>
+				<value>classpath:definition/system.xml</value>
+				<value>file:${schema.definition.location}/*.xml</value>
 			</list>
 		</property>
 	</bean>

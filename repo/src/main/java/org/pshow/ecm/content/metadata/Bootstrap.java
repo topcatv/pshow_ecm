@@ -17,7 +17,6 @@
 package org.pshow.ecm.content.metadata;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.pshow.ecm.content.model.definition.PSDef;
 import org.pshow.ecm.utils.XmlUtil;
@@ -28,7 +27,7 @@ import org.springframework.core.io.Resource;
  * 
  */
 public class Bootstrap {
-	private List<Resource> xml_resources;
+	private Resource[] xml_resources;
 
 	private ContentSchemaHolder csh;
 
@@ -51,7 +50,7 @@ public class Bootstrap {
 		this.csh = csh;
 	}
 
-	public void setXml_resources(List<Resource> xml_resources) {
+	public void setXml_resources(Resource[] xml_resources) {
 		this.xml_resources = xml_resources;
 	}
 }

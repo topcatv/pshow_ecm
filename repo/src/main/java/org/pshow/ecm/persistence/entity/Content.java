@@ -13,11 +13,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
-@Table(name = "ps_content")
+@Table(name = "ps_content", uniqueConstraints=@UniqueConstraint(columnNames={"name", "parent_id"}))
 public class Content extends IdEntity {
 
 	private String uuid;
@@ -51,7 +52,6 @@ public class Content extends IdEntity {
 	}
 
 	@NotBlank
-	@Column(unique=true)
 	public String getName() {
 		return name;
 	}

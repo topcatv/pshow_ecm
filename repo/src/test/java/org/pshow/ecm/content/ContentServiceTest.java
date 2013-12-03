@@ -21,13 +21,21 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.pshow.ecm.SpringTransactionalTestCase;
+import org.pshow.ecm.content.metadata.ContentSchemaHolder;
+import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Workspace;
+import org.pshow.ecm.utils.TestDataLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -39,6 +47,7 @@ import org.springframework.test.context.ContextConfiguration;
 public class ContentServiceTest extends SpringTransactionalTestCase {
 
 	private ContentService contentService;
+	private ContentSchemaHolder csh;
 
 	/**
 	 * @throws java.lang.Exception
@@ -60,7 +69,25 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testGetRoot() {
-		fail("Not yet implemented");
+		String root = contentService.getRoot("not_exist_ws");
+		assertEquals(null, root);
+
+		String workspace_name = createDefaultWorkspace();
+		root = contentService.getRoot(workspace_name);
+
+		assertNotNull("根节点必需存在", root);
+
+		PropertyValue property = contentService.getProperty(root, "base:name");
+
+		assertEquals(workspace_name + ":ROOT", property.getString());
+	}
+
+	private String createDefaultWorkspace() {
+		String workspace_name = "default";
+		if(contentService.findWorkspace(workspace_name) == null){
+			contentService.createWorkspace(workspace_name);
+		}
+		return workspace_name;
 	}
 
 	/**
@@ -70,7 +97,20 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testGetProperties() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "全名";
+		Map<String, PropertyValue> properties = TestDataLoader.loadData("test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name, properties);
+		Map<String, PropertyValue> load_properties = contentService.getProperties(contentId);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<java.lang.String, org.pshow.ecm.content.model.PropertyValue> entry = (Map.Entry<java.lang.String, org.pshow.ecm.content.model.PropertyValue>) iterator
+					.next();
+			PropertyValue propertyValue = load_properties.get(entry.getKey());
+			assertEquals(entry.getValue(), propertyValue);
+		}
 	}
 
 	/**
@@ -191,7 +231,10 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		Workspace workspace = contentService.createWorkspace(workspace_name);
 		assertEquals(workspace_name, workspace.getName());
 		assertNotNull(workspace.getId());
+		// 每个workspace都必须有一个根节点，并且在workspace被创建时默认同时创建
 		assertTrue(StringUtils.isNotBlank(workspace.getRoot()));
+
+		// 同名工作空间不允许创建
 		contentService.createWorkspace(workspace_name);
 	}
 
@@ -202,12 +245,26 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testFindWorkspace() {
-		fail("Not yet implemented");
+		String workspace_name = "by_find_ws";
+		contentService.createWorkspace(workspace_name);
+		Workspace findWorkspace = contentService.findWorkspace(workspace_name);
+		assertEquals(workspace_name, findWorkspace.getName());
+
+		// 找不到workspace返回null
+		Workspace not_exist_ws = contentService.findWorkspace("can_not_found");
+
+		assertEquals(null, not_exist_ws);
 	}
 
 	@Autowired
 	public void setContentService(ContentService contentService) {
 		this.contentService = contentService;
+	}
+
+	@Autowired
+	@Qualifier("contentSchemaHolder")
+	public void setCsh(ContentSchemaHolder csh) {
+		this.csh = csh;
 	}
 
 }
