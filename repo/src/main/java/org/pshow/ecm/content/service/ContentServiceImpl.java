@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ContentServiceImol implements ContentService {
+public class ContentServiceImpl implements ContentService {
 
 	@Autowired
 	private WorkspaceDao workspaceDao;

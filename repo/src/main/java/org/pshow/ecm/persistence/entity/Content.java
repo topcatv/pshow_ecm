@@ -27,6 +27,7 @@ public class Content extends IdEntity {
 	private boolean folder;
 	private boolean versioned;
 	private String contentType;
+	private Workspace worksapce;
 
 	private List<Property> properties;
 
@@ -127,5 +128,15 @@ public class Content extends IdEntity {
 
 	public void setChildren(List<Content> children) {
 		this.children = children;
+	}
+
+	@OneToOne
+	@JoinColumn(name = "workspace_id")
+	public Workspace getWorksapce() {
+		return worksapce;
+	}
+
+	public void setWorksapce(Workspace worksapce) {
+		this.worksapce = worksapce;
 	}
 }
