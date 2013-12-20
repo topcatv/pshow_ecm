@@ -24,9 +24,12 @@ import org.pshow.ecm.content.model.Content;
 import org.pshow.ecm.content.model.ContentFacet;
 import org.pshow.ecm.content.model.ContentType;
 import org.pshow.ecm.content.model.PropertyValue;
+import org.pshow.ecm.content.model.PropertyValue.ValueType;
 import org.pshow.ecm.content.model.Workspace;
 import org.pshow.ecm.persistence.dao.ContentDao;
+import org.pshow.ecm.persistence.dao.PropertyDao;
 import org.pshow.ecm.persistence.dao.WorkspaceDao;
+import org.pshow.ecm.persistence.entity.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,14 +46,19 @@ public class ContentServiceImpl implements ContentService {
 	private WorkspaceDao workspaceDao;
 	@Autowired
 	private ContentDao contentDao;
+	@Autowired
+	private PropertyDao propertyDao;
 
 	/* (non-Javadoc)
 	 * @see org.pshow.ecm.content.ContentService#getRoot(java.lang.String)
 	 */
 	@Override
 	public String getRoot(String workspace) {
-		// TODO Auto-generated method stub
-		return null;
+		org.pshow.ecm.persistence.entity.Workspace ps_workspace = workspaceDao.findByName(workspace);
+		if(ps_workspace == null){
+			return null;
+		}
+		return ps_workspace.getRoot().getUuid();
 	}
 
 	/* (non-Javadoc)
@@ -67,8 +75,12 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public PropertyValue getProperty(String contentId, String name) {
-		// TODO Auto-generated method stub
-		return null;
+		Property property = propertyDao.findByContentUuidAndName(contentId, name);
+		int actualType = property.getActualType();
+		if(ValueType.STRING.getIndex() == actualType){
+			return new PropertyValue(property.getStringValue());
+		}
+		return new PropertyValue(property.getObjectValue());
 	}
 
 	/* (non-Javadoc)
@@ -169,8 +181,15 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public Workspace createWorkspace(String name) {
 		org.pshow.ecm.persistence.entity.Content root = new org.pshow.ecm.persistence.entity.Content();
-		root.setName(String.format("%s:ROOT", name));
+		String rootName = String.format("%s:ROOT", name);
+		root.setName(rootName);
 		contentDao.save(root);
+		Property property = new Property();
+		property.setContent(root);
+		property.setName("base:name");
+		property.setActualType(ValueType.STRING.getIndex());
+		property.setStringValue(rootName);
+		propertyDao.save(property);
 		org.pshow.ecm.persistence.entity.Workspace workspace = new org.pshow.ecm.persistence.entity.Workspace();
 		workspace.setName(name);
 		workspace.setRoot(root);
@@ -188,6 +207,10 @@ public class ContentServiceImpl implements ContentService {
 			return null;
 		}
 		return new Workspace(workspace);
+	}
+
+	public void setPropertyDao(PropertyDao propertyDao) {
+		this.propertyDao = propertyDao;
 	}
 
 }

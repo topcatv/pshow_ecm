@@ -110,7 +110,20 @@ public class PropertyValue implements Serializable {
 	}
 
 	public enum ValueType {
-		INT, LONG, FLOAT, DOUBLE, DATE, STRING, BOOLEAN, ANY
+		
+		INT(1), LONG(2), FLOAT(3), DOUBLE(4), DATE(5), STRING(6), BOOLEAN(7), ANY(8);
+		
+		private int index;
+		
+		private ValueType(int index) {
+	        this.index = index;  
+	    }
+
+		public int getIndex() {
+			return index;
+		}
+		
+		
 	}
 
 }
