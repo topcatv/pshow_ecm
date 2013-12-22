@@ -16,8 +16,11 @@
  */
 package org.pshow.ecm.content.service;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.pshow.ecm.content.ContentService;
 import org.pshow.ecm.content.model.Content;
@@ -66,8 +69,22 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public Map<String, PropertyValue> getProperties(String contentId) {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, PropertyValue> map = new HashMap<String, PropertyValue>();
+		List<Property> properties = propertyDao.findByContentUuid(contentId);
+		if(properties.isEmpty()){
+			return map;
+		}
+		for(Property p : properties){
+			int actualType = p.getActualType();
+			PropertyValue propertyValue = null;
+			if(ValueType.STRING.getIndex() == actualType){
+				propertyValue = new PropertyValue(p.getStringValue());
+			}else{
+				propertyValue = new PropertyValue(p.getObjectValue());
+			}
+			map.put(p.getName(), propertyValue);
+		}
+		return map;
 	}
 
 	/* (non-Javadoc)
@@ -162,8 +179,32 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public String createContent(String type, String parentId, String name,
 			Map<String, PropertyValue> properties) {
-		// TODO Auto-generated method stub
-		return null;
+		org.pshow.ecm.persistence.entity.Content content = new org.pshow.ecm.persistence.entity.Content();
+		content.setName(name);
+		content.setContentType(type);
+		content.setParent(contentDao.findByUuid(parentId));
+		contentDao.save(content);
+		Property property = new Property();
+		property.setContent(content);
+		property.setName("sys:name");
+		property.setActualType(ValueType.STRING.getIndex());
+		property.setStringValue(name);
+		propertyDao.save(property);
+		if(properties != null && !properties.isEmpty()){
+			Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
+			while(iterator.hasNext()){
+				Entry<String, PropertyValue> entry = iterator.next();
+				Property p = new Property();
+				property.setName(entry.getKey());
+				property.setContent(content);
+				PropertyValue propertyValue = entry.getValue();
+				int index = propertyValue.getType().getIndex();
+				p.setActualType(index);
+				setPropertyValue(p, propertyValue);
+				propertyDao.save(property);
+			}
+		}
+		return content.getUuid();
 	}
 
 	/* (non-Javadoc)
@@ -211,6 +252,39 @@ public class ContentServiceImpl implements ContentService {
 
 	public void setPropertyDao(PropertyDao propertyDao) {
 		this.propertyDao = propertyDao;
+	}
+	
+	
+	/**
+	 * 根据属性的类型设置属性相应的值
+	 */
+	private void setPropertyValue(Property p, PropertyValue value){
+		switch (p.getActualType()) {
+		case 1:
+			p.setIntValue(value.getInt());
+			break;
+		case 2:
+			p.setLongValue(value.getLong());
+		break;
+		case 3:
+			p.setFloatValue(value.getFloat());
+		break;
+		case 4:
+			p.setDoubleValue(value.getDouble());
+		break;
+		case 5:
+			p.setDateValue(value.getDate());
+		break;
+		case 6:
+			p.setStringValue(value.getString());
+		break;
+		case 7:
+			p.setBooleanValue(value.getBoolean());
+		break;
+		default:
+			p.setObjectValue(value.getValue());
+			break;
+		}
 	}
 
 }

@@ -16,6 +16,8 @@
  */
 package org.pshow.ecm.persistence.dao;
 
+import java.util.List;
+
 import org.pshow.ecm.persistence.entity.Property;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -26,5 +28,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PropertyDao extends JpaRepository<Property, Long>{
 	
 	public Property findByContentUuidAndName(String content_uuid, String name);
+	
+	public List<Property> findByContentUuid(String content_uuid);
 
 }
