@@ -77,7 +77,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 
 		assertNotNull("根节点必需存在", root);
 
-		PropertyValue property = contentService.getProperty(root, "base:name");
+		PropertyValue property = contentService.getProperty(root, "sys:name");
 
 		assertEquals(workspace_name + ":ROOT", property.getString());
 	}
@@ -120,7 +120,15 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testGetProperty() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试取单个属性";
+		Map<String, PropertyValue> properties = TestDataLoader.loadData("test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name, properties);
+		String property_name = properties.keySet().iterator().next();
+		PropertyValue property = contentService.getProperty(contentId, property_name);
+		assertEquals(properties.get(property_name), property);
 	}
 
 	/**
