@@ -227,7 +227,7 @@ public class ContentServiceImpl implements ContentService {
 		contentDao.save(root);
 		Property property = new Property();
 		property.setContent(root);
-		property.setName("base:name");
+		property.setName("sys:name");
 		property.setActualType(ValueType.STRING.getIndex());
 		property.setStringValue(rootName);
 		propertyDao.save(property);
