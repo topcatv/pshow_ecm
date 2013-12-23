@@ -79,7 +79,6 @@
 				<value>classpath:definition/datatype.xml</value>
 				<value>classpath:definition/system.xml</value>
 				<value>file:${schema.definition.location}/*.xml</value>
-				<value>classpath:definition_test/testtype.xml</value>
 			</list>
 		</property>
 	</bean>
