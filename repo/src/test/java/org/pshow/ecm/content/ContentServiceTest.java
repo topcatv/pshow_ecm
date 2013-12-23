@@ -106,7 +106,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		Map<String, PropertyValue> load_properties = contentService.getProperties(contentId);
 		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
 		while (iterator.hasNext()) {
-			Map.Entry<java.lang.String, org.pshow.ecm.content.model.PropertyValue> entry = (Map.Entry<java.lang.String, org.pshow.ecm.content.model.PropertyValue>) iterator
+			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
 					.next();
 			PropertyValue propertyValue = load_properties.get(entry.getKey());
 			assertEquals(entry.getValue(), propertyValue);
@@ -126,9 +126,14 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		String name = "测试取单个属性";
 		Map<String, PropertyValue> properties = TestDataLoader.loadData("test_getproperties", csh);
 		String contentId = contentService.createContent(type, parentId, name, properties);
-		String property_name = properties.keySet().iterator().next();
-		PropertyValue property = contentService.getProperty(contentId, property_name);
-		assertEquals(properties.get(property_name), property);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
+					.next();
+			String property_name = entry.getKey();
+			PropertyValue property = contentService.getProperty(contentId, property_name);
+			assertEquals(entry.getValue(), property);
+		}
 	}
 
 	/**
@@ -138,7 +143,17 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testSetProperty() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试属性设置";
+		String contentId = contentService.createContent(type, parentId, name);
+		PropertyValue value = new PropertyValue("用户名");
+		contentService.setProperty(contentId, "test:username", value);
+		
+		PropertyValue propertyValue = contentService.getProperty(contentId, "test:username");
+		
+		assertEquals(value, propertyValue);
 	}
 
 	/**
