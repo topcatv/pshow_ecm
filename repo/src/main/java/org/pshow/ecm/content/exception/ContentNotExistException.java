@@ -14,16 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pshow.ecm.content.model;
-
-import java.io.Serializable;
+package org.pshow.ecm.content.exception;
 
 /**
  * @author topcat
  *
  */
-public class ContentFacet implements Serializable {
+public class ContentNotExistException extends Exception{
 
-	private static final long serialVersionUID = 5558493658661848789L;
+	public ContentNotExistException() {
+		super();
+	}
+
+	public ContentNotExistException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public ContentNotExistException(String message) {
+		super(message);
+	}
+
+	public ContentNotExistException(Throwable cause) {
+		super(cause);
+	}
+
+	private static final long serialVersionUID = -5110806391338956709L;
 
 }

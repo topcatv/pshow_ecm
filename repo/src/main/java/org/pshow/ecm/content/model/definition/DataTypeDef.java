@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.pshow.ecm.content.exception.DataTypeUnSupportExeception;
+import org.pshow.ecm.content.exception.DataTypeUnSupportException;
 import org.pshow.ecm.content.model.ContentData;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -34,7 +34,7 @@ public class DataTypeDef {
             return this.type;
         }
 
-        public static Type getObjectType(Serializable o) throws DataTypeUnSupportExeception {
+        public static Type getObjectType(Serializable o) throws DataTypeUnSupportException {
             if (o instanceof Boolean) {
                 return BOOLEAN;
             } else if (o instanceof String) {
@@ -56,7 +56,7 @@ public class DataTypeDef {
             } else if (o instanceof Serializable) {
                 return ANY;
             } else {
-                throw new DataTypeUnSupportExeception(String.format("Unsupport [%s] data type", o.getClass().getName()));
+                throw new DataTypeUnSupportException(String.format("Unsupport [%s] data type", o.getClass().getName()));
             }
         }
 

@@ -30,6 +30,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.pshow.ecm.SpringTransactionalTestCase;
+import org.pshow.ecm.content.exception.ContentConstraintException;
+import org.pshow.ecm.content.exception.ContentNotExistException;
 import org.pshow.ecm.content.metadata.ContentSchemaHolder;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Workspace;
@@ -84,7 +86,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 
 	private String createDefaultWorkspace() {
 		String workspace_name = "default";
-		if(contentService.findWorkspace(workspace_name) == null){
+		if (contentService.findWorkspace(workspace_name) == null) {
 			contentService.createWorkspace(workspace_name);
 		}
 		return workspace_name;
@@ -101,10 +103,14 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		String type = "test:TestType";
 		String parentId = contentService.getRoot(workspace_name);
 		String name = "全名";
-		Map<String, PropertyValue> properties = TestDataLoader.loadData("test_getproperties", csh);
-		String contentId = contentService.createContent(type, parentId, name, properties);
-		Map<String, PropertyValue> load_properties = contentService.getProperties(contentId);
-		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
+		Map<String, PropertyValue> properties = TestDataLoader.loadData(
+				"test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name,
+				properties);
+		Map<String, PropertyValue> load_properties = contentService
+				.getProperties(contentId);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet()
+				.iterator();
 		while (iterator.hasNext()) {
 			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
 					.next();
@@ -124,14 +130,18 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		String type = "test:TestType";
 		String parentId = contentService.getRoot(workspace_name);
 		String name = "测试取单个属性";
-		Map<String, PropertyValue> properties = TestDataLoader.loadData("test_getproperties", csh);
-		String contentId = contentService.createContent(type, parentId, name, properties);
-		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
+		Map<String, PropertyValue> properties = TestDataLoader.loadData(
+				"test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name,
+				properties);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet()
+				.iterator();
 		while (iterator.hasNext()) {
 			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
 					.next();
 			String property_name = entry.getKey();
-			PropertyValue property = contentService.getProperty(contentId, property_name);
+			PropertyValue property = contentService.getProperty(contentId,
+					property_name);
 			assertEquals(entry.getValue(), property);
 		}
 	}
@@ -150,9 +160,18 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		String contentId = contentService.createContent(type, parentId, name);
 		PropertyValue value = new PropertyValue("用户名");
 		contentService.setProperty(contentId, "test:username", value);
-		
-		PropertyValue propertyValue = contentService.getProperty(contentId, "test:username");
-		
+
+		PropertyValue propertyValue = contentService.getProperty(contentId,
+				"test:username");
+
+		assertEquals(value, propertyValue);
+
+		value = new PropertyValue("test001");
+
+		contentService.setProperty(contentId, "test:username", value);
+
+		propertyValue = contentService.getProperty(contentId, "test:username");
+
 		assertEquals(value, propertyValue);
 	}
 
@@ -163,7 +182,25 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testSetProperites() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试取所有属性";
+		Map<String, PropertyValue> properties = TestDataLoader.loadData(
+				"test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name,
+				properties);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet()
+				.iterator();
+		Map<String, PropertyValue> properties2 = contentService
+				.getProperties(contentId);
+		while (iterator.hasNext()) {
+			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
+					.next();
+			String property_name = entry.getKey();
+			PropertyValue property = properties2.get(property_name);
+			assertEquals(entry.getValue(), property);
+		}
 	}
 
 	/**
@@ -181,9 +218,37 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 * {@link org.pshow.ecm.content.ContentService#removeProperty(java.lang.String, java.lang.String)}
 	 * .
 	 */
-	@Test
+	@Test(expected=ContentConstraintException.class)
 	public void testRemoveProperty() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试属性移除";
+		String contentId = contentService.createContent(type, parentId, name);
+		
+		PropertyValue value = new PropertyValue("用户名");
+		contentService.setProperty(contentId, "test:username", value);
+		PropertyValue propertyValue = contentService.getProperty(contentId,
+				"test:username");
+		assertEquals(value, propertyValue);
+		
+		value = new PropertyValue(20);
+		contentService.setProperty(contentId, "test:age", value);
+		propertyValue = contentService.getProperty(contentId,
+				"test:age");
+		assertEquals(value, propertyValue);
+		
+		contentService.removeProperty(contentId, "test:age");
+		
+		propertyValue = contentService.getProperty(contentId,
+				"test:age");
+		
+		assertEquals(null, propertyValue);
+		
+		contentService.removeProperty(contentId, "test:username");
+		
+		fail("not to here");
+		
 	}
 
 	/**
@@ -192,7 +257,13 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testGetType() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试获取类型";
+		String contentId = contentService.createContent(type, parentId, name);
+		String ct = contentService.getType(contentId);
+		assertEquals(type, ct);
 	}
 
 	/**
@@ -215,32 +286,26 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 
 	/**
 	 * Test method for
-	 * {@link org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public void testCreateContentStringStringString() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String, java.util.Map)}
-	 * .
-	 */
-	@Test
-	public void testCreateContentStringStringStringMapOfStringPropertyValue() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for
 	 * {@link org.pshow.ecm.content.ContentService#removeContent(java.lang.String)}
 	 * .
 	 */
-	@Test
+	@Test(expected=ContentNotExistException.class)
 	public void testRemoveContent() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试移除内容";
+		String contentId = contentService.createContent(type, parentId, name);
+		PropertyValue value = new PropertyValue("用户名");
+		contentService.setProperty(contentId, "test:username", value);
+		PropertyValue propertyValue = contentService.getProperty(contentId,
+				"test:username");
+		assertEquals(value, propertyValue);
+		
+		contentService.removeContent(contentId);
+		propertyValue = contentService.getProperty(contentId,
+				"test:username");
+		fail("not to here");
 	}
 
 	/**

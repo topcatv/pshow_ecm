@@ -20,28 +20,36 @@ package org.pshow.ecm.content.exception;
  * @author topcat
  *
  */
-public class DataTypeUnSupportExeception extends Exception {
+public class ContentConstraintException extends Exception {
 
-	public DataTypeUnSupportExeception() {
-		super();
-		// TODO Auto-generated constructor stub
+	private static final long serialVersionUID = -5635960721228006297L;
+
+	/**
+	 * 
+	 */
+	public ContentConstraintException() {
 	}
 
-	public DataTypeUnSupportExeception(String message, Throwable cause) {
-		super(message, cause);
-		// TODO Auto-generated constructor stub
-	}
-
-	public DataTypeUnSupportExeception(String message) {
+	/**
+	 * @param message
+	 */
+	public ContentConstraintException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
-	public DataTypeUnSupportExeception(Throwable cause) {
+	/**
+	 * @param cause
+	 */
+	public ContentConstraintException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
-	private static final long serialVersionUID = -6200075350123307609L;
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public ContentConstraintException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }

@@ -24,8 +24,6 @@ import java.util.Map.Entry;
 
 import org.pshow.ecm.content.ContentService;
 import org.pshow.ecm.content.model.Content;
-import org.pshow.ecm.content.model.ContentFacet;
-import org.pshow.ecm.content.model.ContentType;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.PropertyValue.ValueType;
 import org.pshow.ecm.content.model.Workspace;
@@ -141,7 +139,7 @@ public class ContentServiceImpl implements ContentService {
 	 * @see org.pshow.ecm.content.ContentService#getType(java.lang.String)
 	 */
 	@Override
-	public ContentType getType(String contentId) {
+	public String getType(String contentId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -150,7 +148,7 @@ public class ContentServiceImpl implements ContentService {
 	 * @see org.pshow.ecm.content.ContentService#getFacets(java.lang.String)
 	 */
 	@Override
-	public List<ContentFacet> getFacets(String contentId) {
+	public List<String> getFacets(String contentId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

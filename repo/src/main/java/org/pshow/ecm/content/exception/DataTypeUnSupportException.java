@@ -14,16 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pshow.ecm.content.model;
-
-import java.io.Serializable;
+package org.pshow.ecm.content.exception;
 
 /**
  * @author topcat
  *
  */
-public class ContentType implements Serializable {
+public class DataTypeUnSupportException extends Exception {
 
-	private static final long serialVersionUID = -3647237136533111877L;
+	public DataTypeUnSupportException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public DataTypeUnSupportException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	public DataTypeUnSupportException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
+
+	public DataTypeUnSupportException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
+
+	private static final long serialVersionUID = -6200075350123307609L;
 
 }
