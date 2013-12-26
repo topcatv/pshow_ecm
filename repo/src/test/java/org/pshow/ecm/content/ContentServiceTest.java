@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -244,7 +245,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 				"test:age");
 		
 		assertEquals(null, propertyValue);
-		
+		//必填属性不可删除
 		contentService.removeProperty(contentId, "test:username");
 		
 		fail("not to here");
@@ -281,7 +282,20 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testGetChild() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "父";
+		String contentId = contentService.createContent(type, parentId, name);
+		String c1 = contentService.createContent(type, contentId, "子1");
+		String c2 = contentService.createContent(type, contentId, "子2");
+		String c3 = contentService.createContent(type, contentId, "子3");
+		
+		List<String> child = contentService.getChild(contentId);
+		
+		assertTrue(child.contains(c1));
+		assertTrue(child.contains(c2));
+		assertTrue(child.contains(c3));
 	}
 
 	/**

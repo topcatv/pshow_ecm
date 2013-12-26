@@ -3,7 +3,6 @@ package org.pshow.ecm.content;
 import java.util.List;
 import java.util.Map;
 
-import org.pshow.ecm.content.model.Content;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Workspace;
 
@@ -17,7 +16,7 @@ public interface ContentService {
 	public void removeProperty(String contentId, String name);
 	public String getType(String contentId);
 	public List<String> getFacets(String contentId);
-	public List<Content> getChild(String contentId);
+	public List<String> getChild(String contentId);
 	public String createContent(String type, String parentId, String name);
 	public String createContent(String type, String parentId, String name, Map<String, PropertyValue> properties);
 	public void removeContent(String contentId);

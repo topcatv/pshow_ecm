@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.pshow.ecm.content.ContentService;
-import org.pshow.ecm.content.model.Content;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.PropertyValue.ValueType;
 import org.pshow.ecm.content.model.Workspace;
@@ -157,7 +156,7 @@ public class ContentServiceImpl implements ContentService {
 	 * @see org.pshow.ecm.content.ContentService#getChild(java.lang.String)
 	 */
 	@Override
-	public List<Content> getChild(String contentId) {
+	public List<String> getChild(String contentId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
