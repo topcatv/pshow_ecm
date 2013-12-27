@@ -77,7 +77,7 @@ public class Content extends IdEntity {
 		this.folder = folder;
 	}
 
-	@OneToMany(mappedBy = "id")
+	@OneToMany(mappedBy = "content")
 	public List<Property> getProperties() {
 		return properties;
 	}
