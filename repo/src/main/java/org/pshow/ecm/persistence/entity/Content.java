@@ -18,7 +18,8 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
-@Table(name = "ps_content", uniqueConstraints=@UniqueConstraint(columnNames={"name", "parent_id"}))
+@Table(name = "ps_content", uniqueConstraints = @UniqueConstraint(columnNames = {
+		"name", "parent_id" }))
 public class Content extends IdEntity {
 
 	private String uuid;
@@ -43,7 +44,7 @@ public class Content extends IdEntity {
 	}
 
 	@NotBlank
-	@Column(unique=true)
+	@Column(unique = true)
 	public String getUuid() {
 		return uuid;
 	}
@@ -77,7 +78,7 @@ public class Content extends IdEntity {
 		this.folder = folder;
 	}
 
-	@OneToMany(mappedBy = "content")
+	@OneToMany(cascade = { CascadeType.ALL }, mappedBy = "content")
 	public List<Property> getProperties() {
 		return properties;
 	}
@@ -112,7 +113,7 @@ public class Content extends IdEntity {
 	}
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	@JoinColumn(name = "parent_id", nullable=true)
+	@JoinColumn(name = "parent_id", nullable = true)
 	public Content getParent() {
 		return parent;
 	}
