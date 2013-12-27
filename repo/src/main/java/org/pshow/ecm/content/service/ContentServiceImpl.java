@@ -70,18 +70,10 @@ public class ContentServiceImpl implements ContentService {
 	public Map<String, PropertyValue> getProperties(String contentId) {
 		Map<String, PropertyValue> map = new HashMap<String, PropertyValue>();
 		List<Property> properties = propertyDao.findByContentUuid(contentId);
-		if(properties.isEmpty()){
-			return map;
-		}
-		for(Property p : properties){
-			int actualType = p.getActualType();
-			PropertyValue propertyValue = null;
-			if(ValueType.STRING.getIndex() == actualType){
-				propertyValue = new PropertyValue(p.getStringValue());
-			}else{
-				propertyValue = new PropertyValue(p.getObjectValue());
+		if(properties != null){
+			for(Property p : properties){
+				map.put(p.getName(), getPropertyValue(p));
 			}
-			map.put(p.getName(), propertyValue);
 		}
 		return map;
 	}
@@ -92,9 +84,27 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public PropertyValue getProperty(String contentId, String name) {
 		Property property = propertyDao.findByContentUuidAndName(contentId, name);
+		return property == null ? null :getPropertyValue(property);
+	}
+	
+	private PropertyValue getPropertyValue(Property property){
 		int actualType = property.getActualType();
-		if(ValueType.STRING.getIndex() == actualType){
+		if(ValueType.INT.getIndex() == actualType){
+			return new PropertyValue(property.getIntValue());
+		}else if(ValueType.LONG.getIndex() == actualType){
+			return new PropertyValue(property.getLongValue());
+		}else if(ValueType.FLOAT.getIndex() == actualType){
+			return new PropertyValue(property.getFloatValue());
+		}else if(ValueType.DOUBLE.getIndex() == actualType){
+			return new PropertyValue(property.getDoubleValue());
+		}else if(ValueType.DATE.getIndex() == actualType){
+			return new PropertyValue(property.getDateValue());
+		}else if(ValueType.STRING.getIndex() == actualType){
 			return new PropertyValue(property.getStringValue());
+		}else if(ValueType.BOOLEAN.getIndex() == actualType){
+			return new PropertyValue(property.isBooleanValue());
+		}else if(ValueType.ANY.getIndex() == actualType){
+			return new PropertyValue(property.getObjectValue());
 		}
 		return new PropertyValue(property.getObjectValue());
 	}
@@ -104,7 +114,16 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public void setProperty(String contentId, String name, PropertyValue value) {
-		// TODO Auto-generated method stub
+		Property property = propertyDao.findByContentUuidAndName(contentId, name);
+		if(property == null){
+			property = new Property();
+			property.setContent(contentDao.findByUuid(contentId));
+			property.setName(name);
+		}
+		int index = value.getType().getIndex();
+		property.setActualType(index);
+		setPropertyValue(property, value);
+		propertyDao.save(property);
 
 	}
 
@@ -132,8 +151,10 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public void removeProperty(String contentId, String name) {
-		// TODO Auto-generated method stub
-
+		Property property = propertyDao.findByContentUuidAndName(contentId, name);
+		if(property != null){
+			propertyDao.delete(property);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -141,8 +162,8 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public String getType(String contentId) {
-		// TODO Auto-generated method stub
-		return null;
+		Content content = contentDao.findByUuid(contentId);
+			return content == null ? null : content.getContentType();
 	}
 
 	/* (non-Javadoc)
@@ -159,8 +180,12 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public List<String> getChild(String contentId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> list = new ArrayList<String>();
+		List<Content> children = contentDao.findByParentUuid(contentId);
+		for(Content c : children){
+			list.add(c.getUuid());
+		}
+		return list;
 	}
 
 	/* (non-Javadoc)
@@ -168,16 +193,6 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public String createContent(String type, String parentId, String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
-	 */
-	@Override
-	public String createContent(String type, String parentId, String name,
-			Map<String, PropertyValue> properties) {
 		org.pshow.ecm.persistence.entity.Content content = new org.pshow.ecm.persistence.entity.Content();
 		content.setName(name);
 		content.setContentType(type);
@@ -189,6 +204,17 @@ public class ContentServiceImpl implements ContentService {
 		property.setActualType(ValueType.STRING.getIndex());
 		property.setStringValue(name);
 		propertyDao.save(property);
+		return content.getUuid();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+	 */
+	@Override
+	public String createContent(String type, String parentId, String name,
+			Map<String, PropertyValue> properties) {
+		String uuid = createContent(type, parentId, name);
+		Content content = contentDao.findByUuid(uuid);
 		if(properties != null && !properties.isEmpty()){
 			Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
 			while(iterator.hasNext()){
@@ -203,7 +229,7 @@ public class ContentServiceImpl implements ContentService {
 				propertyDao.save(p);
 			}
 		}
-		return content.getUuid();
+		return uuid;
 	}
 
 	/* (non-Javadoc)
@@ -211,7 +237,14 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public void removeContent(String contentId) {
-		// TODO Auto-generated method stub
+		List<Property> properties = propertyDao.findByContentUuid(contentId);
+		if(properties != null && !properties.isEmpty()){
+			propertyDao.deleteInBatch(properties);
+		}
+		Content content = contentDao.findByUuid(contentId);
+		if(content != null){
+			contentDao.delete(content);
+		}
 
 	}
 
