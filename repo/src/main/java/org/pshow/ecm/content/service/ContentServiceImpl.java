@@ -16,6 +16,7 @@
  */
 package org.pshow.ecm.content.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.pshow.ecm.content.model.Workspace;
 import org.pshow.ecm.persistence.dao.ContentDao;
 import org.pshow.ecm.persistence.dao.PropertyDao;
 import org.pshow.ecm.persistence.dao.WorkspaceDao;
+import org.pshow.ecm.persistence.entity.Content;
 import org.pshow.ecm.persistence.entity.Property;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -192,13 +194,13 @@ public class ContentServiceImpl implements ContentService {
 			while(iterator.hasNext()){
 				Entry<String, PropertyValue> entry = iterator.next();
 				Property p = new Property();
-				property.setName(entry.getKey());
-				property.setContent(content);
+				p.setName(entry.getKey());
+				p.setContent(content);
 				PropertyValue propertyValue = entry.getValue();
 				int index = propertyValue.getType().getIndex();
 				p.setActualType(index);
 				setPropertyValue(p, propertyValue);
-				propertyDao.save(property);
+				propertyDao.save(p);
 			}
 		}
 		return content.getUuid();

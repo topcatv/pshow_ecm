@@ -18,6 +18,7 @@ package org.pshow.ecm.persistence.dao;
 
 import java.util.List;
 
+import org.pshow.ecm.persistence.entity.Content;
 import org.pshow.ecm.persistence.entity.Property;
 import org.springframework.data.jpa.repository.JpaRepository;
 
