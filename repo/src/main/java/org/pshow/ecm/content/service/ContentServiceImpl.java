@@ -237,15 +237,11 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public void removeContent(String contentId) {
-		List<Property> properties = propertyDao.findByContentUuid(contentId);
-		if(properties != null && !properties.isEmpty()){
-			propertyDao.deleteInBatch(properties);
-		}
 		Content content = contentDao.findByUuid(contentId);
 		if(content != null){
 			contentDao.delete(content);
+			contentDao.flush();
 		}
-
 	}
 
 	/* (non-Javadoc)

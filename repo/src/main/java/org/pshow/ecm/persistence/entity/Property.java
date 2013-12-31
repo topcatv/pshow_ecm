@@ -3,6 +3,7 @@ package org.pshow.ecm.persistence.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -25,7 +26,7 @@ public class Property extends IdEntity {
 	private String stringValue;
 	private Serializable objectValue;
 
-	@ManyToOne
+	@ManyToOne(cascade = { CascadeType.ALL }, optional = false)
 	@JoinColumn(name = "content_id")
 	public Content getContent() {
 		return content;
