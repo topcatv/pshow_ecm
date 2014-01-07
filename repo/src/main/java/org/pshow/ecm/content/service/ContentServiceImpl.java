@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.pshow.ecm.content.ContentService;
 import org.pshow.ecm.content.model.PropertyValue;
@@ -131,9 +132,14 @@ public class ContentServiceImpl implements ContentService {
 	 * @see org.pshow.ecm.content.ContentService#setProperites(java.lang.String, java.util.Map)
 	 */
 	@Override
-	public void setProperites(String contentId,
-			Map<String, PropertyValue> values) {
-		// TODO Auto-generated method stub
+	public void setProperites(String contentId, Map<String, PropertyValue> values) {
+		if(values != null){
+			Iterator<Entry<String, PropertyValue>> it = values.entrySet().iterator();
+			while(it.hasNext()){
+				Entry<String, PropertyValue> entry = it.next();
+				this.setProperty(contentId, entry.getKey(), entry.getValue());
+			}
+		}
 
 	}
 
@@ -310,7 +316,11 @@ public class ContentServiceImpl implements ContentService {
 			p.setBooleanValue(value.getBoolean());
 			break;
 		default:
-			p.setObjectValue(value.getValue());
+			if(value == null){
+				p.setObjectValue(null);
+			}else{
+				p.setObjectValue(value.getValue());
+			}
 			break;
 		}
 	}
