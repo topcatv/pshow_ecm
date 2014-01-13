@@ -12,5 +12,4 @@ public interface VersionService {
 	public Version checkIn(String contentId, String comments, VersionStrategy strategy);
 	public VersionHistory getVersionHistory(String contentId);
 	public void restore(String contentId, String label);
-	public void removeVersion(String contentId, String label);
 }

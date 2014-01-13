@@ -14,38 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pshow.ecm.content.model;
-
-import java.io.Serializable;
-import java.util.Set;
+package org.pshow.ecm.content.exception;
 
 /**
  * @author topcat
  *
  */
-public class VersionHistory implements Serializable {
+public class CheckInException extends Exception{
 
-	private static final long serialVersionUID = -3382851016486201864L;
-	private String contentId;
-	
-	public Version getVersion(String versionNumber){
-		return null;
+	public CheckInException() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
-	
-	public String getContent(){
-		return this.contentId;
+
+	public CheckInException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
 	}
-	
-	public Version getLastVersion(){
-		return null;
+
+	public CheckInException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
 	}
-	
-	public Version getFirstVersion(){
-		return null;
+
+	public CheckInException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
 	}
-	
-	public Set<Version> getAllVersions(){
-		return null;
-	}
-	
+
+	private static final long serialVersionUID = 5685929059975692286L;
+
 }

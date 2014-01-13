@@ -25,5 +25,58 @@ import java.io.Serializable;
 public class Version implements Serializable {
 
 	private static final long serialVersionUID = 3993807940856651297L;
+	private String contentId;
+	private String label;
+	private String versionNum;
+	
+	public String getContent(){
+		return this.contentId;
+	}
+	
+	public String getLabel(){
+		return this.label;
+	}
+	
+	public String getNumber(){
+		return this.versionNum;
+	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((contentId == null) ? 0 : contentId.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
+		result = prime * result
+				+ ((versionNum == null) ? 0 : versionNum.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Version other = (Version) obj;
+		if (contentId == null) {
+			if (other.contentId != null)
+				return false;
+		} else if (!contentId.equals(other.contentId))
+			return false;
+		if (label == null) {
+			if (other.label != null)
+				return false;
+		} else if (!label.equals(other.label))
+			return false;
+		if (versionNum == null) {
+			if (other.versionNum != null)
+				return false;
+		} else if (!versionNum.equals(other.versionNum))
+			return false;
+		return true;
+	}
 }
