@@ -255,7 +255,7 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 		
 		VersionHistory versionHistory = versionService.getVersionHistory(contentId);
 		assertEquals(3, versionHistory.getAllVersions().size());
-		assertEquals("2.1", versionHistory.getLastVersion().getLabel());
+		assertEquals("restore version to 1.0", versionHistory.getLastVersion().getLabel());
 		assertEquals("2.1", versionHistory.getLastVersion().getNumber());
 	}
 

@@ -16,11 +16,8 @@
  */
 package org.pshow.ecm.content.service;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
 import java.util.Set;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.pshow.ecm.content.VersionService;
 import org.pshow.ecm.content.exception.CheckInException;
@@ -28,7 +25,6 @@ import org.pshow.ecm.content.exception.CheckOutException;
 import org.pshow.ecm.content.model.Version;
 import org.pshow.ecm.content.model.VersionHistory;
 import org.pshow.ecm.content.model.VersionStrategy;
-import org.pshow.ecm.persistence.T;
 import org.pshow.ecm.persistence.dao.ContentDao;
 import org.pshow.ecm.persistence.dao.PropertyDao;
 import org.pshow.ecm.persistence.dao.VersionDao;
@@ -37,6 +33,7 @@ import org.pshow.ecm.persistence.dao.VersionPropertyDao;
 import org.pshow.ecm.persistence.entity.Content;
 import org.pshow.ecm.persistence.entity.Property;
 import org.pshow.ecm.persistence.entity.VersionedProperty;
+import org.pshow.ecm.utils.common.ExtBeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -142,33 +139,21 @@ public class VersionServiceImpl implements VersionService {
 				versionHistory.getLastVersion()));
 		versionHistory.addVersion(version);
 
+		versionDao.save(version);
 		Set<Property> properties = content.getProperties();
 		if (CollectionUtils.isNotEmpty(properties)) {
 			for (Property property : properties) {
 				VersionedProperty versionedProperty = new VersionedProperty();
-				try {
-					BeanUtils.copyProperties(versionedProperty, property);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				}
+				ExtBeanUtils.copyProperties(versionedProperty, property);
 				versionedProperty.setId(null);
 				version.addVersionedProperty(versionedProperty);
 				versionPropertyDao.save(versionedProperty);
 			}
 		}
-		versionDao.save(version);
 
 		return new Version(version);
 	}
-	
-	public static void main(String[] args) throws IllegalAccessException, InvocationTargetException {
-		T t = new T();
-		T t2 = new T();
-		BeanUtils.copyProperties(t2, t);
-	}
-	
+
 	private String nextVersionNumber(VersionStrategy strategy,
 			org.pshow.ecm.persistence.entity.Version lastVersion) {
 		if (null == lastVersion) {
@@ -210,26 +195,32 @@ public class VersionServiceImpl implements VersionService {
 	 */
 	@Override
 	public void restore(String contentId, String versionNumber) {
+		try {
+			this.checkOut(contentId);
+			this.checkIn(contentId,
+					String.format("restore version to %s", versionNumber),
+					VersionStrategy.major);
+		} catch (CheckOutException e1) {
+			e1.printStackTrace();
+		} catch (CheckInException e) {
+			e.printStackTrace();
+		}
+		// 将现有属性与内容断开并删除
 		Content content = contentDao.findByUuid(contentId);
-		org.pshow.ecm.persistence.entity.Version version = versionDao
-				.findVersion(contentId, versionNumber);
-		Set<VersionedProperty> versionedProperties = version
-				.getVersionedProperties();
 		Set<Property> properties = content.getProperties();
 		content.setProperties(null);
 		if (null != properties) {
 			propertyDao.deleteInBatch(properties);
 		}
+		// 将指定版本属性取出并填充到当前内容中
+		org.pshow.ecm.persistence.entity.Version version = versionDao
+				.findVersion(contentId, versionNumber);
+		Set<VersionedProperty> versionedProperties = version
+				.getVersionedProperties();
 		if (null != versionedProperties) {
 			for (VersionedProperty vp : versionedProperties) {
 				Property property = new Property();
-				try {
-					BeanUtils.copyProperties(property, vp);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				}
+				ExtBeanUtils.copyProperties(property, vp);
 				property.setId(null);
 				content.addProperty(property);
 				propertyDao.save(property);
