@@ -18,6 +18,8 @@
 
 	<!-- project default level -->
 	<logger name="org.pshow.ecm" level="INFO" />
+	<logger name="org.hibernate.SQL" level="TRACE" />
+	<logger name="org.hibernate.type" level="TRACE" />
 
 	<!--log4jdbc -->
 	<logger name="jdbc.sqltiming" level="INFO"/>
