@@ -17,35 +17,53 @@
 package org.pshow.ecm.content.model;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author topcat
- *
+ * 
  */
 public class VersionHistory implements Serializable {
 
 	private static final long serialVersionUID = -3382851016486201864L;
+	private List<Version> versions;
 	private String contentId;
-	
-	public Version getVersion(String versionNumber){
+
+	public VersionHistory(org.pshow.ecm.persistence.entity.VersionHistory vh) {
+		contentId = vh.getContent().getUuid();
+		versions = new ArrayList<Version>();
+		List<org.pshow.ecm.persistence.entity.Version> v = vh.getVersions();
+		for (org.pshow.ecm.persistence.entity.Version version : v) {
+			versions.add(new Version(version));
+		}
+	}
+
+	public Version getVersion(String versionNumber) {
+		for (Version version : versions) {
+			if (StringUtils.equals(versionNumber, version.getNumber())) {
+				return version;
+			}
+		}
 		return null;
 	}
-	
-	public String getContent(){
-		return this.contentId;
+
+	public String getContent() {
+		return contentId;
 	}
-	
-	public Version getLastVersion(){
-		return null;
+
+	public Version getLastVersion() {
+		return versions.get(versions.size() - 1);
 	}
-	
-	public Version getFirstVersion(){
-		return null;
+
+	public Version getFirstVersion() {
+		return versions.get(0);
 	}
-	
-	public Set<Version> getAllVersions(){
-		return null;
+
+	public List<Version> getAllVersions() {
+		return versions;
 	}
-	
+
 }

@@ -1,12 +1,13 @@
 package org.pshow.ecm.persistence.entity;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -14,8 +15,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.validator.constraints.NotBlank;
 
 @Entity
 @Table(name = "ps_content", uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -30,7 +29,7 @@ public class Content extends IdEntity {
 	private String contentType;
 	private Workspace worksapce;
 
-	private List<Property> properties;
+	private Set<Property> properties;
 
 	private VersionHistory versionHistory;
 
@@ -43,8 +42,7 @@ public class Content extends IdEntity {
 		this.uuid = UUID.randomUUID().toString();
 	}
 
-	@NotBlank
-	@Column(unique = true)
+	@Column(unique = true, nullable = false)
 	public String getUuid() {
 		return uuid;
 	}
@@ -53,7 +51,7 @@ public class Content extends IdEntity {
 		this.uuid = uuid;
 	}
 
-	@NotBlank
+	@Column(nullable = false)
 	public String getName() {
 		return name;
 	}
@@ -79,12 +77,19 @@ public class Content extends IdEntity {
 	}
 
 	@OneToMany(cascade = { CascadeType.ALL }, mappedBy = "content")
-	public List<Property> getProperties() {
+	public Set<Property> getProperties() {
 		return properties;
 	}
 
-	public void setProperties(List<Property> properties) {
+	public void setProperties(Set<Property> properties) {
 		this.properties = properties;
+	}
+
+	public void addProperty(Property property) {
+		property.setContent(this);
+		if (null == properties)
+			properties = new HashSet<Property>();
+		this.properties.add(property);
 	}
 
 	public boolean isVersioned() {
@@ -95,7 +100,7 @@ public class Content extends IdEntity {
 		this.versioned = versioned;
 	}
 
-	@OneToOne
+	@OneToOne(mappedBy="content")
 	public VersionHistory getVersionHistory() {
 		return versionHistory;
 	}
@@ -112,7 +117,7 @@ public class Content extends IdEntity {
 		this.contentType = contentType;
 	}
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ManyToOne
 	@JoinColumn(name = "parent_id", nullable = true)
 	public Content getParent() {
 		return parent;
@@ -122,7 +127,7 @@ public class Content extends IdEntity {
 		this.parent = parent;
 	}
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "parent", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "parent")
 	public List<Content> getChildren() {
 		return children;
 	}
@@ -132,7 +137,6 @@ public class Content extends IdEntity {
 	}
 
 	@OneToOne
-	@JoinColumn(name = "workspace_id")
 	public Workspace getWorksapce() {
 		return worksapce;
 	}

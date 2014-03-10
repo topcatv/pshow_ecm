@@ -14,51 +14,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.pshow.ecm.persistence.entity;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import org.hibernate.validator.constraints.NotBlank;
+package org.pshow.ecm.content.exception;
 
 /**
  * @author topcat
- * 
+ *
  */
-@Entity
-@Table(name = "ps_workspace")
-public class Workspace extends IdEntity {
+public class CheckOutException extends Exception {
 
-	private String name;
-	private Content root;
+	private static final long serialVersionUID = 4683662205574311940L;
 
-	public Workspace() {
-
+	/**
+	 * 
+	 */
+	public CheckOutException() {
+		// TODO Auto-generated constructor stub
 	}
 
-	public Workspace(String name) {
-		this.name = name;
+	/**
+	 * @param message
+	 */
+	public CheckOutException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
 	}
 
-	@NotBlank
-	@Column(unique = true)
-	public String getName() {
-		return name;
+	/**
+	 * @param cause
+	 */
+	public CheckOutException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@OneToOne
-	public Content getRoot() {
-		return root;
-	}
-
-	public void setRoot(Content root) {
-		this.root = root;
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public CheckOutException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
 	}
 
 }

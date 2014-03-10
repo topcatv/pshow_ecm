@@ -201,7 +201,9 @@ public class ContentServiceImpl implements ContentService {
 		org.pshow.ecm.persistence.entity.Content content = new org.pshow.ecm.persistence.entity.Content();
 		content.setName(name);
 		content.setContentType(type);
-		content.setParent(contentDao.findByUuid(parentId));
+		Content parent = contentDao.findByUuid(parentId);
+		content.setParent(parent);
+		content.setWorksapce(parent.getWorksapce());
 		contentDao.save(content);
 		Property property = new Property();
 		property.setContent(content);
@@ -226,11 +228,11 @@ public class ContentServiceImpl implements ContentService {
 				Entry<String, PropertyValue> entry = iterator.next();
 				Property p = new Property();
 				p.setName(entry.getKey());
-				p.setContent(content);
 				PropertyValue propertyValue = entry.getValue();
 				int index = propertyValue.getType().getIndex();
 				p.setActualType(index);
 				setPropertyValue(p, propertyValue);
+				content.addProperty(p);
 				propertyDao.save(p);
 			}
 		}
@@ -257,17 +259,18 @@ public class ContentServiceImpl implements ContentService {
 		org.pshow.ecm.persistence.entity.Content root = new org.pshow.ecm.persistence.entity.Content();
 		String rootName = String.format("%s:ROOT", name);
 		root.setName(rootName);
-		contentDao.save(root);
 		Property property = new Property();
-		property.setContent(root);
 		property.setName("sys:name");
 		property.setActualType(ValueType.STRING.getIndex());
 		property.setStringValue(rootName);
-		propertyDao.save(property);
+		root.addProperty(property);
 		org.pshow.ecm.persistence.entity.Workspace workspace = new org.pshow.ecm.persistence.entity.Workspace();
 		workspace.setName(name);
 		workspace.setRoot(root);
 		workspaceDao.save(workspace);
+		root.setWorksapce(workspace);
+		contentDao.save(root);
+		propertyDao.save(property);
 		return new Workspace(workspace);
 	}
 

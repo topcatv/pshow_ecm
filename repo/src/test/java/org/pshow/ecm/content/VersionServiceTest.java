@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pshow.ecm.SpringTransactionalTestCase;
 import org.pshow.ecm.content.exception.CheckInException;
+import org.pshow.ecm.content.exception.CheckOutException;
 import org.pshow.ecm.content.metadata.ContentSchemaHolder;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Version;
@@ -41,47 +42,76 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 	}
 
 	@Test
-	public void testGetVersion() {
+	public void testGetVersion() throws CheckInException {
 		String contentId = createContent();
-		boolean checkOut = versionService.checkOut(contentId);
+		boolean checkOut = checkout(contentId);
 		String label = "测试版本";
 		Version checkIn = null;
 		if (checkOut) {
 			checkIn = versionService.checkIn(contentId, label,
 					VersionStrategy.major);
 		}
-		Version version = versionService.getVersion(contentId, label);
+		Version version = versionService.getVersion(contentId, checkIn.getNumber());
 
 		assertNotNull(checkIn);
 		assertEquals(checkIn, version);
 	}
 
+	private boolean checkout(String contentId) {
+		try {
+			versionService.checkOut(contentId);
+			return true;
+		} catch (CheckOutException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	@Test
 	public void testCheckOut() {
 		String contentId = createContent();
-		boolean checkOut = versionService.checkOut(contentId);
+		try {
+			versionService.checkOut(contentId);
+		} catch (CheckOutException e) {
+			fail("not to here");
+			e.printStackTrace();
+		}
 
-		assertTrue(checkOut);
+		try {
+			versionService.checkOut(contentId);
+			fail("not to here");
+		} catch (CheckOutException e) {
+			e.printStackTrace();
+		}
 
-		checkOut = versionService.checkOut(contentId);
-
-		assertFalse(checkOut);
 	}
 
 	@Test
 	public void testCancelCheckOut() {
 		String contentId = createContent();
-		boolean cancelCheckOut = versionService.cancelCheckOut(contentId);
+		boolean cancelCheckOut = cancelCheckout(contentId);
 
 		assertFalse(cancelCheckOut);
 
-		boolean checkOut = versionService.checkOut(contentId);
+		boolean checkOut = checkout(contentId);
 
 		assertTrue(checkOut);
 
-		cancelCheckOut = versionService.cancelCheckOut(contentId);
+		cancelCheckOut = cancelCheckout(contentId);
 
 		assertTrue(cancelCheckOut);
+	}
+
+	private boolean cancelCheckout(String contentId) {
+		boolean cancelCheckOut;
+		try {
+			versionService.cancelCheckOut(contentId);
+			cancelCheckOut = true;
+		} catch (CheckOutException e) {
+			e.printStackTrace();
+			cancelCheckOut = false;
+		}
+		return cancelCheckOut;
 	}
 
 	private String createContent() {
@@ -97,7 +127,7 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 	}
 
 	@Test(expected=CheckInException.class)
-	public void testCheckIn() {
+	public void testCheckIn() throws CheckInException {
 		String contentId = createContent();
 		String comments = "comments for first";
 		try {
@@ -107,32 +137,32 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 			assertEquals("content wasn't checkout state", e.getMessage());
 		}
 
-		boolean checkOut = versionService.checkOut(contentId);
+		boolean checkOut = checkout(contentId);
 		if (checkOut) {
 			Version checkIn = versionService.checkIn(contentId, comments,
 					VersionStrategy.major);
 			assertNotNull(checkIn);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, checkIn.getNumber());
 			assertEquals(checkIn, version);
 			assertEquals("1.0", version.getNumber());
 		} else {
 			fail("checkout fail");
 		}
 		
-		checkOut = versionService.checkOut(contentId);
+		checkOut = checkout(contentId);
 		if (checkOut) {
 			comments = "comment for second";
 			Version checkIn = versionService.checkIn(contentId, comments,
 					VersionStrategy.minor);
 			assertNotNull(checkIn);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, checkIn.getNumber());
 			assertEquals(checkIn, version);
 			assertEquals("1.1", version.getNumber());
 		} else {
 			fail("checkout fail");
 		}
 		
-		checkOut = versionService.checkOut(contentId);
+		checkOut = checkout(contentId);
 		if (checkOut) {
 			//同样的 comments抛出异常
 			versionService.checkIn(contentId, comments,	VersionStrategy.minor);
@@ -142,29 +172,30 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 	}
 
 	@Test
-	public void testGetVersionHistory() {
+	public void testGetVersionHistory() throws CheckInException {
 		String contentId = createContent();
 		String comments = "comments for first";
-		boolean checkOut = versionService.checkOut(contentId);
+		boolean checkOut = checkout(contentId);
+		
 		Version first = null;
 		if (checkOut) {
 			first = versionService.checkIn(contentId, comments,
 					VersionStrategy.major);
 			assertNotNull(first);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, first.getNumber());
 			assertEquals(first, version);
 			assertEquals("1.0", version.getNumber());
 		} else {
 			fail("checkout fail");
 		}
-		checkOut = versionService.checkOut(contentId);
+		checkOut = checkout(contentId);
 		Version second = null;
 		if (checkOut) {
 			comments = "comments for second";
 			second = versionService.checkIn(contentId, comments,
 					VersionStrategy.minor);
 			assertNotNull(second);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, second.getNumber());
 			assertEquals(second, version);
 			assertEquals("1.1", version.getNumber());
 		} else {
@@ -180,22 +211,22 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 	}
 
 	@Test
-	public void testRestore() {
+	public void testRestore() throws CheckInException {
 		String contentId = createContent();
 		String comments = "comments for first";
-		boolean checkOut = versionService.checkOut(contentId);
+		boolean checkOut = checkout(contentId);
 		Version first = null;
 		if (checkOut) {
 			first = versionService.checkIn(contentId, comments,
 					VersionStrategy.major);
 			assertNotNull(first);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, first.getNumber());
 			assertEquals(first, version);
 			assertEquals("1.0", version.getNumber());
 		} else {
 			fail("checkout fail");
 		}
-		checkOut = versionService.checkOut(contentId);
+		checkOut = checkout(contentId);
 		Version second = null;
 		if (checkOut) {
 			comments = "comments for second";
@@ -206,7 +237,7 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 			contentService.setProperty(contentId, "test:username", value);
 			
 			assertNotNull(second);
-			Version version = versionService.getVersion(contentId, comments);
+			Version version = versionService.getVersion(contentId, second.getNumber());
 			assertEquals(second, version);
 			assertEquals("1.1", version.getNumber());
 			PropertyValue property = contentService.getProperty(contentId, "test:username");
@@ -217,7 +248,7 @@ public class VersionServiceTest extends SpringTransactionalTestCase {
 		}
 		
 		//restor默认版本升级，升级主版本，label和版本号相同
-		versionService.restore(contentId, "comments for first");
+		versionService.restore(contentId, "1.0");
 		
 		PropertyValue property = contentService.getProperty(contentId, "test:username");
 		assertEquals(new PropertyValue("中文试试"), property);

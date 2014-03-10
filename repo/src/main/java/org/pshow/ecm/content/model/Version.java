@@ -29,6 +29,12 @@ public class Version implements Serializable {
 	private String label;
 	private String versionNum;
 	
+	public Version(org.pshow.ecm.persistence.entity.Version version) {
+		this.contentId = version.getVersionHistory().getContent().getUuid();
+		this.label = version.getComments();
+		this.versionNum = version.getLabel();
+	}
+
 	public String getContent(){
 		return this.contentId;
 	}

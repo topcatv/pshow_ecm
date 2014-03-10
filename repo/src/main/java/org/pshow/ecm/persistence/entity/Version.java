@@ -1,6 +1,11 @@
 package org.pshow.ecm.persistence.entity;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.NotBlank;
@@ -12,6 +17,8 @@ public class Version extends IdEntity {
 	private String label;
 	private String comments;
 	private int index;
+	private VersionHistory versionHistory;
+	private Set<VersionedProperty> versionedProperties;
 
 	@NotBlank
 	public String getLabel() {
@@ -36,5 +43,31 @@ public class Version extends IdEntity {
 
 	public void setIndex(int index) {
 		this.index = index;
+	}
+
+	@ManyToOne
+	public VersionHistory getVersionHistory() {
+		return versionHistory;
+	}
+
+	public void setVersionHistory(VersionHistory versionHistory) {
+		this.versionHistory = versionHistory;
+	}
+
+	@OneToMany(mappedBy="version")
+	public Set<VersionedProperty> getVersionedProperties() {
+		return versionedProperties;
+	}
+
+	public void setVersionedProperties(Set<VersionedProperty> versionedProperties) {
+		this.versionedProperties = versionedProperties;
+	}
+	
+	public void addVersionedProperty(VersionedProperty versionedProperty){
+		if(this.versionedProperties == null){
+			this.versionedProperties = new HashSet<VersionedProperty>(1);
+		}
+		versionedProperties.add(versionedProperty);
+		versionedProperty.setVersion(this);
 	}
 }
