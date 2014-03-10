@@ -16,10 +16,7 @@
  */
 package org.pshow.ecm.content;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +29,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pshow.ecm.SpringTransactionalTestCase;
 import org.pshow.ecm.content.exception.ContentConstraintException;
-import org.pshow.ecm.content.exception.ContentNotExistException;
 import org.pshow.ecm.content.metadata.ContentSchemaHolder;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Workspace;
@@ -218,9 +214,10 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 * Test method for
 	 * {@link org.pshow.ecm.content.ContentService#removeProperty(java.lang.String, java.lang.String)}
 	 * .
+	 * @throws ContentConstraintException 
 	 */
 	@Test(expected=ContentConstraintException.class)
-	public void testRemoveProperty() {
+	public void testRemoveProperty() throws ContentConstraintException {
 		String workspace_name = createDefaultWorkspace();
 		String type = "test:TestType";
 		String parentId = contentService.getRoot(workspace_name);
@@ -244,7 +241,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		propertyValue = contentService.getProperty(contentId,
 				"test:age");
 		
-		assertEquals(null, propertyValue);
+		assertNull(propertyValue);
 		//必填属性不可删除
 		contentService.removeProperty(contentId, "test:username");
 		
@@ -303,7 +300,6 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 * {@link org.pshow.ecm.content.ContentService#removeContent(java.lang.String)}
 	 * .
 	 */
-	@Test(expected=ContentNotExistException.class)
 	public void testRemoveContent() {
 		String workspace_name = createDefaultWorkspace();
 		String type = "test:TestType";
@@ -319,7 +315,7 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		contentService.removeContent(contentId);
 		propertyValue = contentService.getProperty(contentId,
 				"test:username");
-		fail("not to here");
+		assertNull(propertyValue);
 	}
 
 	/**

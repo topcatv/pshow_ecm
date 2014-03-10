@@ -3,6 +3,7 @@ package org.pshow.ecm.content;
 import java.util.List;
 import java.util.Map;
 
+import org.pshow.ecm.content.exception.ContentConstraintException;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.Workspace;
 
@@ -13,7 +14,7 @@ public interface ContentService {
 	public void setProperty(String contentId, String name, PropertyValue value);
 	public void setProperites(String contentId, Map<String, PropertyValue> values);
 	public void addProperty(String contentId, String name, PropertyValue value);
-	public void removeProperty(String contentId, String name);
+	public void removeProperty(String contentId, String name) throws ContentConstraintException;
 	public String getType(String contentId);
 	public List<String> getFacets(String contentId);
 	public List<String> getChild(String contentId);

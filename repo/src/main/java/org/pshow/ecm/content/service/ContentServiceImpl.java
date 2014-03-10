@@ -24,9 +24,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.pshow.ecm.content.ContentService;
+import org.pshow.ecm.content.exception.ContentConstraintException;
+import org.pshow.ecm.content.metadata.ContentSchemaHolder;
 import org.pshow.ecm.content.model.PropertyValue;
 import org.pshow.ecm.content.model.PropertyValue.ValueType;
 import org.pshow.ecm.content.model.Workspace;
+import org.pshow.ecm.content.model.definition.TypeDef;
 import org.pshow.ecm.persistence.dao.ContentDao;
 import org.pshow.ecm.persistence.dao.PropertyDao;
 import org.pshow.ecm.persistence.dao.WorkspaceDao;
@@ -38,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author topcat
- *
+ * 
  */
 @Service
 @Transactional
@@ -50,75 +53,91 @@ public class ContentServiceImpl implements ContentService {
 	private ContentDao contentDao;
 	@Autowired
 	private PropertyDao propertyDao;
+	@Autowired
+	private ContentSchemaHolder csh;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#getRoot(java.lang.String)
 	 */
 	@Override
 	public String getRoot(String workspace) {
-		org.pshow.ecm.persistence.entity.Workspace ps_workspace = workspaceDao.findByName(workspace);
-		if(ps_workspace == null){
+		org.pshow.ecm.persistence.entity.Workspace ps_workspace = workspaceDao
+				.findByName(workspace);
+		if (ps_workspace == null) {
 			return null;
 		}
 		return ps_workspace.getRoot().getUuid();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#getProperties(java.lang.String)
 	 */
 	@Override
 	public Map<String, PropertyValue> getProperties(String contentId) {
 		Map<String, PropertyValue> map = new HashMap<String, PropertyValue>();
 		List<Property> properties = propertyDao.findByContentUuid(contentId);
-		if(properties != null){
-			for(Property p : properties){
+		if (properties != null) {
+			for (Property p : properties) {
 				map.put(p.getName(), getPropertyValue(p));
 			}
 		}
 		return map;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#getProperty(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#getProperty(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public PropertyValue getProperty(String contentId, String name) {
-		Property property = propertyDao.findByContentUuidAndName(contentId, name);
-		return property == null ? null :getPropertyValue(property);
+		Property property = propertyDao.findByContentUuidAndName(contentId,
+				name);
+		return property == null ? null : getPropertyValue(property);
 	}
-	
-	private PropertyValue getPropertyValue(Property property){
+
+	private PropertyValue getPropertyValue(Property property) {
 		int actualType = property.getActualType();
-		if(ValueType.INT.getIndex() == actualType){
+		if (ValueType.INT.getIndex() == actualType) {
 			return new PropertyValue(property.getIntValue());
-		}else if(ValueType.LONG.getIndex() == actualType){
+		} else if (ValueType.LONG.getIndex() == actualType) {
 			return new PropertyValue(property.getLongValue());
-		}else if(ValueType.FLOAT.getIndex() == actualType){
+		} else if (ValueType.FLOAT.getIndex() == actualType) {
 			return new PropertyValue(property.getFloatValue());
-		}else if(ValueType.DOUBLE.getIndex() == actualType){
+		} else if (ValueType.DOUBLE.getIndex() == actualType) {
 			return new PropertyValue(property.getDoubleValue());
-		}else if(ValueType.DATE.getIndex() == actualType){
+		} else if (ValueType.DATE.getIndex() == actualType) {
 			return new PropertyValue(property.getDateValue());
-		}else if(ValueType.STRING.getIndex() == actualType){
+		} else if (ValueType.STRING.getIndex() == actualType) {
 			return new PropertyValue(property.getStringValue());
-		}else if(ValueType.BOOLEAN.getIndex() == actualType){
+		} else if (ValueType.BOOLEAN.getIndex() == actualType) {
 			return new PropertyValue(property.isBooleanValue());
-		}else if(ValueType.ANY.getIndex() == actualType){
+		} else if (ValueType.ANY.getIndex() == actualType) {
 			return new PropertyValue(property.getObjectValue());
 		}
 		return new PropertyValue(property.getObjectValue());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#setProperty(java.lang.String, java.lang.String, org.pshow.ecm.content.model.PropertyValue)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#setProperty(java.lang.String,
+	 * java.lang.String, org.pshow.ecm.content.model.PropertyValue)
 	 */
 	@Override
 	public void setProperty(String contentId, String name, PropertyValue value) {
-		Property property = propertyDao.findByContentUuidAndName(contentId, name);
-		if(property == null){
+		Property property = propertyDao.findByContentUuidAndName(contentId,
+				name);
+		if (property == null) {
 			property = new Property();
-			property.setContent(contentDao.findByUuid(contentId));
+			Content content = contentDao.findByUuid(contentId);
 			property.setName(name);
+			content.addProperty(property);
 		}
 		int index = value.getType().getIndex();
 		property.setActualType(index);
@@ -127,14 +146,19 @@ public class ContentServiceImpl implements ContentService {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#setProperites(java.lang.String, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#setProperites(java.lang.String,
+	 * java.util.Map)
 	 */
 	@Override
-	public void setProperites(String contentId, Map<String, PropertyValue> values) {
-		if(values != null){
-			Iterator<Entry<String, PropertyValue>> it = values.entrySet().iterator();
-			while(it.hasNext()){
+	public void setProperites(String contentId,
+			Map<String, PropertyValue> values) {
+		if (values != null) {
+			Iterator<Entry<String, PropertyValue>> it = values.entrySet()
+					.iterator();
+			while (it.hasNext()) {
 				Entry<String, PropertyValue> entry = it.next();
 				this.setProperty(contentId, entry.getKey(), entry.getValue());
 			}
@@ -142,8 +166,11 @@ public class ContentServiceImpl implements ContentService {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#addProperty(java.lang.String, java.lang.String, org.pshow.ecm.content.model.PropertyValue)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#addProperty(java.lang.String,
+	 * java.lang.String, org.pshow.ecm.content.model.PropertyValue)
 	 */
 	@Override
 	public void addProperty(String contentId, String name, PropertyValue value) {
@@ -151,27 +178,48 @@ public class ContentServiceImpl implements ContentService {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#removeProperty(java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pshow.ecm.content.ContentService#removeProperty(java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
-	public void removeProperty(String contentId, String name) {
-		Property property = propertyDao.findByContentUuidAndName(contentId, name);
-		if(property != null){
+	public void removeProperty(String contentId, String name) throws ContentConstraintException {
+		
+		Property property = propertyDao.findByContentUuidAndName(contentId,
+				name);
+		if(isMandatoryProperty(property)){
+			throw new ContentConstraintException(String.format("Property '%s' is mandatory.", property.getName()));
+		}
+		if (property != null) {
+			property.getContent().removeProperty(property);
 			propertyDao.delete(property);
 		}
 	}
 
-	/* (non-Javadoc)
+	private boolean isMandatoryProperty(Property property) {
+		String contentType = property.getContent().getContentType();
+		TypeDef typeDef = csh.getContentType(contentType);
+		boolean mandatory = typeDef.getPropoerty(property.getName()).isMandatory();
+		return mandatory;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#getType(java.lang.String)
 	 */
 	@Override
 	public String getType(String contentId) {
 		Content content = contentDao.findByUuid(contentId);
-			return content == null ? null : content.getContentType();
+		return content == null ? null : content.getContentType();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#getFacets(java.lang.String)
 	 */
 	@Override
@@ -180,21 +228,26 @@ public class ContentServiceImpl implements ContentService {
 		return null;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#getChild(java.lang.String)
 	 */
 	@Override
 	public List<String> getChild(String contentId) {
 		List<String> list = new ArrayList<String>();
 		List<Content> children = contentDao.findByParentUuid(contentId);
-		for(Content c : children){
+		for (Content c : children) {
 			list.add(c.getUuid());
 		}
 		return list;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String,
+	 * java.lang.String, java.lang.String)
 	 */
 	@Override
 	public String createContent(String type, String parentId, String name) {
@@ -204,27 +257,31 @@ public class ContentServiceImpl implements ContentService {
 		Content parent = contentDao.findByUuid(parentId);
 		content.setParent(parent);
 		content.setWorksapce(parent.getWorksapce());
-		contentDao.save(content);
 		Property property = new Property();
-		property.setContent(content);
 		property.setName("sys:name");
 		property.setActualType(ValueType.STRING.getIndex());
 		property.setStringValue(name);
+		content.addProperty(property);
+		contentDao.save(content);
 		propertyDao.save(property);
 		return content.getUuid();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String, java.lang.String, java.lang.String, java.util.Map)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pshow.ecm.content.ContentService#createContent(java.lang.String,
+	 * java.lang.String, java.lang.String, java.util.Map)
 	 */
 	@Override
 	public String createContent(String type, String parentId, String name,
 			Map<String, PropertyValue> properties) {
 		String uuid = createContent(type, parentId, name);
 		Content content = contentDao.findByUuid(uuid);
-		if(properties != null && !properties.isEmpty()){
-			Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet().iterator();
-			while(iterator.hasNext()){
+		if (properties != null && !properties.isEmpty()) {
+			Iterator<Entry<String, PropertyValue>> iterator = properties
+					.entrySet().iterator();
+			while (iterator.hasNext()) {
 				Entry<String, PropertyValue> entry = iterator.next();
 				Property p = new Property();
 				p.setName(entry.getKey());
@@ -239,20 +296,27 @@ public class ContentServiceImpl implements ContentService {
 		return uuid;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#removeContent(java.lang.String)
 	 */
 	@Override
 	public void removeContent(String contentId) {
 		Content content = contentDao.findByUuid(contentId);
-		if(content != null){
+		if (content != null) {
+//			if(content.getProperties() != null){
+//				propertyDao.delete(content.getProperties());
+//			}
 			contentDao.delete(content);
-			contentDao.flush();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.pshow.ecm.content.ContentService#createWorkspace(java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pshow.ecm.content.ContentService#createWorkspace(java.lang.String)
 	 */
 	@Override
 	public Workspace createWorkspace(String name) {
@@ -274,13 +338,16 @@ public class ContentServiceImpl implements ContentService {
 		return new Workspace(workspace);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.pshow.ecm.content.ContentService#findWorkspace(java.lang.String)
 	 */
 	@Override
 	public Workspace findWorkspace(String name) {
-		org.pshow.ecm.persistence.entity.Workspace workspace = workspaceDao.findByName(name);
-		if(workspace == null){
+		org.pshow.ecm.persistence.entity.Workspace workspace = workspaceDao
+				.findByName(name);
+		if (workspace == null) {
 			return null;
 		}
 		return new Workspace(workspace);
@@ -289,12 +356,11 @@ public class ContentServiceImpl implements ContentService {
 	public void setPropertyDao(PropertyDao propertyDao) {
 		this.propertyDao = propertyDao;
 	}
-	
-	
+
 	/**
 	 * 根据属性的类型设置属性相应的值
 	 */
-	private void setPropertyValue(Property p, PropertyValue value){
+	private void setPropertyValue(Property p, PropertyValue value) {
 		switch (p.getActualType()) {
 		case 1:
 			p.setIntValue(value.getInt());
@@ -318,9 +384,9 @@ public class ContentServiceImpl implements ContentService {
 			p.setBooleanValue(value.getBoolean());
 			break;
 		default:
-			if(value == null){
+			if (value == null) {
 				p.setObjectValue(null);
-			}else{
+			} else {
 				p.setObjectValue(value.getValue());
 			}
 			break;

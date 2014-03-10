@@ -2,6 +2,8 @@ package org.pshow.ecm.content.model.definition;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 public class ClassDef {
@@ -52,5 +54,14 @@ public class ClassDef {
 
 	public void setProperties(List<PropertyDef> properties) {
 		this.properties = properties;
+	}
+	
+	public PropertyDef getPropoerty(String propertyName){
+		for (PropertyDef pd : properties) {
+			if(StringUtils.equals(propertyName, pd.getName())){
+				return pd;
+			}
+		}
+		return null;
 	}
 }

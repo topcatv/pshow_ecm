@@ -100,7 +100,7 @@ public class Content extends IdEntity {
 		this.versioned = versioned;
 	}
 
-	@OneToOne(mappedBy="content")
+	@OneToOne(mappedBy = "content")
 	public VersionHistory getVersionHistory() {
 		return versionHistory;
 	}
@@ -143,5 +143,10 @@ public class Content extends IdEntity {
 
 	public void setWorksapce(Workspace worksapce) {
 		this.worksapce = worksapce;
+	}
+
+	public void removeProperty(Property property) {
+		if (this.properties != null)
+			this.properties.remove(property);
 	}
 }
