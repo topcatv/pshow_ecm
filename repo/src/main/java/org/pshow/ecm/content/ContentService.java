@@ -16,7 +16,6 @@ public interface ContentService {
 	public void addProperty(String contentId, String name, PropertyValue value);
 	public void removeProperty(String contentId, String name) throws ContentConstraintException;
 	public String getType(String contentId);
-	public List<String> getFacets(String contentId);
 	public List<String> getChild(String contentId);
 	public String createContent(String type, String parentId, String name);
 	public String createContent(String type, String parentId, String name, Map<String, PropertyValue> properties);

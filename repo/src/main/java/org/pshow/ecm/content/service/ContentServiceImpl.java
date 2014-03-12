@@ -174,8 +174,23 @@ public class ContentServiceImpl implements ContentService {
 	 */
 	@Override
 	public void addProperty(String contentId, String name, PropertyValue value) {
-		// TODO Auto-generated method stub
+		Content content = contentDao.findByUuid(contentId);
+		Property property = propertyDao.findByContentUuidAndName(contentId, name);
+		if (property == null || isMultipleProperty(property)) {
+			property = new Property();
+			property.setName(name);
+		}
+		int index = value.getType().getIndex();
+		property.setActualType(index);
+		setPropertyValue(property, value);
+		content.addProperty(property);
+		propertyDao.save(property);
+	}
 
+	private boolean isMultipleProperty(Property property) {
+		TypeDef contentType = csh.getContentType(property.getContent().getContentType());
+		boolean multipled = contentType.getPropoerty(property.getName()).isMultipled();
+		return multipled;
 	}
 
 	/*
@@ -215,17 +230,6 @@ public class ContentServiceImpl implements ContentService {
 	public String getType(String contentId) {
 		Content content = contentDao.findByUuid(contentId);
 		return content == null ? null : content.getContentType();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.pshow.ecm.content.ContentService#getFacets(java.lang.String)
-	 */
-	@Override
-	public List<String> getFacets(String contentId) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	/*

@@ -65,18 +65,5 @@
 				</property>
 			</properties>
 		</facet>
-		<facet name="sys:versionable">
-			<title>版本</title>
-			<properties>
-				<property name="sys:versionlabel" mandatory="true" indexed="true">
-					<title>版本标签</title>
-					<type>d:text</type>
-				</property>
-				<property name="sys:versiondescription" indexed="true">
-					<title>版本描述</title>
-					<type>d:text</type>
-				</property>
-			</properties>
-		</facet>
 	</facets>
 </model>

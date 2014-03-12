@@ -207,7 +207,24 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 	 */
 	@Test
 	public void testAddProperty() {
-		fail("Not yet implemented");
+		String workspace_name = createDefaultWorkspace();
+		String type = "test:TestType";
+		String parentId = contentService.getRoot(workspace_name);
+		String name = "测试添加属性";
+		Map<String, PropertyValue> properties = TestDataLoader.loadData(
+				"test_getproperties", csh);
+		String contentId = contentService.createContent(type, parentId, name);
+		Iterator<Entry<String, PropertyValue>> iterator = properties.entrySet()
+				.iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String, PropertyValue> entry = (Map.Entry<String, PropertyValue>) iterator
+					.next();
+			String property_name = entry.getKey();
+			PropertyValue value = entry.getValue();
+			contentService.addProperty(contentId, property_name, value);
+			PropertyValue property = contentService.getProperty(contentId, property_name);
+			assertEquals(value, property);
+		}
 	}
 
 	/**
@@ -262,15 +279,6 @@ public class ContentServiceTest extends SpringTransactionalTestCase {
 		String contentId = contentService.createContent(type, parentId, name);
 		String ct = contentService.getType(contentId);
 		assertEquals(type, ct);
-	}
-
-	/**
-	 * Test method for
-	 * {@link org.pshow.ecm.content.ContentService#getFacets(java.lang.String)}.
-	 */
-	@Test
-	public void testGetFacets() {
-		fail("Not yet implemented");
 	}
 
 	/**
